@@ -4,25 +4,26 @@ Library for mapping flat sql result sets to nested data structures.
 
 ## Usage
 
-### Mapping single objects
+All functions take result set as first parameter, so mappings can be chained with -> macro:
 
-SQL-query:
+	(-> rs (map-as-collection ...) (map-as-collection ...) ...)
 
-	SELECT p.name, a.city, a.country FROM person p, address a WHERE p.address_id = address.id
+Function map-as maps some fields of each row in result set as nested map:
 
-Result set:
-
-	[{:name "Santtu" :city "Helsinki" :country "Finland"}}
-
-Mapping:
-
-	(-> rs (map-as :address [:city :country]))
+	(-> [{:name "Santtu" :city "Helsinki" :country "Finland"}} 
+	    (map-as :address [:city :country]))
 	
 	=> [{:name "Santtu" :address {:city "Helsinki" :country "Finland"}}]
 
+Function map-as-collection maps fields as collection of maps. Function groups rows by other fields values.
+
+	(-> [{:post "Post1" :comment "Comment1"} {:post "Post1" :comment "Comment2"}]
+	    (map-as-collection :comments [:comment]))
+	
+	=> [{:post "Post1" :comments [{:comment "Comment1"} {:comment "Comment2"}]}]
+
 ## Todo
 
-- Mapping collections of object
 - Mapping collections of values
 - Mapping fields by prefix
 - Ignoring objects with all fields being nil
