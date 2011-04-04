@@ -33,6 +33,7 @@ Function collect-as maps a collection of values:
 
 - Mapping fields by prefix
 - Ignoring objects with all fields being nil
+- Join separate result sets
 
 ## License
 
