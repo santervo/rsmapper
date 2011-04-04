@@ -22,9 +22,15 @@ Function map-as-collection maps fields as collection of maps. Function groups ro
 	
 	=> [{:post "Post1" :comments [{:comment "Comment1"} {:comment "Comment2"}]}]
 
+Function collect-as maps a collection of values:
+
+	(-> [{:post "Post1" :tag "Tag1"} {:post "Post1" :tag "Tag2"}]
+	    (collect-as :tags :tag))
+
+	=> [{:post "Post1" :tags ["Tag1" "Tag2"]}]
+
 ## Todo
 
-- Mapping collections of values
 - Mapping fields by prefix
 - Ignoring objects with all fields being nil
 

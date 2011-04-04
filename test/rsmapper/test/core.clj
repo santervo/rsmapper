@@ -31,3 +31,9 @@
                    (map-as-collection :tags [:tag_name]))]
       (is (= expected actual)))))
 
+(deftest test-collect-as
+  (let [expected [{:name "Joe" :emails ["joe@example.com" "test@example.com"]}]
+        result-set [{:name "Joe" :email "joe@example.com"}
+                    {:name "Joe" :email "test@example.com"}]
+        actual (-> result-set (collect-as :emails :email))]
+    (is (= expected actual))))
