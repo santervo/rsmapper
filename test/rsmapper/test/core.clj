@@ -37,3 +37,15 @@
                     {:name "Joe" :email "test@example.com"}]
         actual (-> result-set (collect-as :emails :email))]
     (is (= expected actual))))
+
+(deftest test-include-as
+  (let [expected [{:id 1 :title "Post 1" :comments [{:post_id 1 :title "Comment 1"} 
+                                                    {:post_id 1 :title "Comment 2"}]}
+                  {:id 2 :title "Post 2" :comments [{:post_id 2 :title "Comment"}]}]
+        post-result-set [{:id 1 :title "Post 1"} {:id 2 :title "Post 2"}]
+        comment-result-set [{:post_id 1 :title "Comment 1"} 
+                            {:post_id 1 :title "Comment 2"} 
+                            {:post_id 2 :title "Comment"}]
+        actual (-> post-result-set (include-as :comments comment-result-set :id :post_id))]
+    (is (= expected actual))))
+ 
