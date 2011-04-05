@@ -19,3 +19,10 @@
 (defn map-as-collection [result-set k fields]
   "Maps fields in each row of result-set as nested map and collects them with key k."
   (-> result-set (map-as k fields) (collect-as k k)))
+
+(defn include-as [result-set k other id other-id]
+  "Groups rows in other by field id in result-set and other-id in other. Associates collections
+  with key k to result-set rows."
+  (let [collections (group-by other-id other)]
+    (map #(assoc % k (collections (% id))) result-set)))
+
