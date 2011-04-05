@@ -29,11 +29,17 @@ Function collect-as maps a collection of values:
 
 	=> [{:post "Post1" :tags ["Tag1" "Tag2"]}]
 
+Function include-as maps other result-set as nested collections of result-set rows:
+
+	(-> [{:id 1 :title "Post 1"}]
+	    (include-as :comments [{:c_id 1 :title 1 "Comment 1"} {:c_id 1 :title "Comment 2"}] :id :c_id))
+
+	=> [{:id 1 :title "Post 1" :comments [{:c_id 1 :title 1 "Comment 1"} {:c_id 1 :title "Comment 2"}]}]
+
 ## Todo
 
 - Mapping fields by prefix
 - Ignoring objects with all fields being nil
-- Join separate result sets
 
 ## License
 
