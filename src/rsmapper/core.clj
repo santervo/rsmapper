@@ -7,7 +7,7 @@
 
 (defn nest [result-set k cols]
   "Map columns in each row of result-set as nested map with key k."
-  (map (partial row-map-as k cols) result-set))
+  (map #(nest-row % k cols) result-set))
 
 (defn collect [result-set k ks]
   "Groups rows from result-set by all fields excluding field ks, and collects all ks fields
