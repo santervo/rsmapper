@@ -6,40 +6,44 @@ Library for mapping flat sql result sets to nested data structures.
 
 All functions take result set as first parameter, so mappings can be chained with -> macro:
 
-	(-> rs (map-as-collection ...) (map-as-collection ...) ...)
+	(-> rs (nest ...) (collect ...) ...)
 
-Function map-as maps some fields of each row in result set as nested map:
+Map columns as nested object:
 
 	(-> [{:name "Santtu" :city "Helsinki" :country "Finland"}} 
-	    (map-as :address [:city :country]))
+	    (nest :address [:city :country]))
 	
 	=> [{:name "Santtu" :address {:city "Helsinki" :country "Finland"}}]
 
-Function map-as-collection maps fields as collection of maps. Function groups rows by other fields values.
+Rename mapped columns:
 
-	(-> [{:post "Post1" :comment "Comment1"} {:post "Post1" :comment "Comment2"}]
-	    (map-as-collection :comments [:comment]))
+	(-> [{:name "Santtu" :address_city "Helsinki" :address_country "Finland"}} 
+	    (nest :address {:address_city :city :address_country :country}))
 	
-	=> [{:post "Post1" :comments [{:comment "Comment1"} {:comment "Comment2"}]}]
+	=> [{:name "Santtu" :address {:city "Helsinki" :country "Finland"}}]
 
-Function collect-as maps a collection of values:
+Map values as collection:
 
 	(-> [{:post "Post1" :tag "Tag1"} {:post "Post1" :tag "Tag2"}]
-	    (collect-as :tags :tag))
+	    (collect :tags :tag))
 
 	=> [{:post "Post1" :tags ["Tag1" "Tag2"]}]
 
-Function include-as maps other result-set as nested collections of result-set rows:
+Join two result sets:
 
 	(-> [{:id 1 :title "Post 1"}]
-	    (include-as :comments [{:c_id 1 :title 1 "Comment 1"} {:c_id 1 :title "Comment 2"}] :id :c_id))
+	    (join :comment [{:c_id 1 :title 1 "Comment 1"} {:c_id 1 :title "Comment 2"}] :id :c_id))
 
-	=> [{:id 1 :title "Post 1" :comments [{:c_id 1 :title 1 "Comment 1"} {:c_id 1 :title "Comment 2"}]}]
+	=> [{:id 1 :title "Post 1" :comment {:c_id 1 :title "Comment 1"}}
+	    {:id 1 :title "Post 1" :comment {:c_id 1 :title "Comment 2"}}]
 
-## Todo
+Chain mappings:
 
-- Mapping fields by prefix
-- Ignoring objects with all fields being nil
+	(-> [{:post "Post1" :comment_body "Comment1"} {:post "Post1" :comment_body "Comment2"}]
+	    (nest :comment {:comment_body :body})
+	    (collect :comments :comment))
+	
+	=> [{:post "Post1" :comments [{:body "Comment1"} {:body "Comment2"}]}]
 
 ## License
 
