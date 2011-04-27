@@ -1,20 +1,35 @@
-(ns rsmapper.core)
+(ns rsmapper.core
+  (:require [clojure.set]))
 
-(defn- nest-row [row k cols]
-  (let [nested (select-keys row cols)
-        row (apply dissoc row cols)]
-    (assoc row k nested)))
+(defn- nest-row [k cols]
+  (fn [row]
+    (let [nested (select-keys row cols)
+          row (apply dissoc row cols)]
+      (assoc row k nested))))
 
-(defn nest [result-set k cols]
+(defn- rename-keys-in [k col-map]
+  (fn [row]
+    (update-in row [k] clojure.set/rename-keys col-map)))
+
+(defn nest [rs k cols]
   "Map columns in each row of result-set as nested map with key k."
-  (map #(nest-row % k cols) result-set))
+  (if (map? cols)
+    (map (rename-keys-in k cols) (map (nest-row k (keys cols)) rs))
+    (map (nest-row k cols) rs)))
 
-(defn collect [result-set k ks]
-  "Groups rows from result-set by all fields excluding field ks, and collects all ks fields
-  as collection keyd k"
-  (let [grouping-f (fn [row] (dissoc row ks))
-        combiner-f (fn [[row coll-rows]] (assoc row k (map ks coll-rows)))]
-    (map combiner-f (group-by grouping-f result-set))))
+(defn- all-but [k]
+  (fn [m] (dissoc m k)))
+
+(defn- map-val [f]
+  (fn [e] [(first e) (map f (second e))]))
+
+(defn- assoc-val [k]
+  (fn [e] (assoc (first e) k (second e))))
+
+(defn collect [rs coll-key k]
+  "Groups rows from result-set by all fields excluding column k, 
+  and collects all values of key k as collection of key coll-key." 
+  (map (assoc-val coll-key) (map (map-val k) (group-by (all-but k) rs))))
 
 (defn join [rs k other-rs matching-f grouping-f]
   "Joins rs with other-rs by creating a new map for every row r1 in rs
@@ -24,6 +39,6 @@
   for matching-f and grouping-f."
   (let [collections (group-by grouping-f other-rs)]
     (for [row rs
-          other-row (or (collections (matching-f row) [nil]))]
+          other-row (or (get collections (matching-f row) [nil]))]
       (assoc row k other-row))))
 

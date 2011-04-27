@@ -7,6 +7,11 @@
     (let [expected [{:name "Santtu" :address {:zipcode "00560" :city "Helsinki"}}]
           result-set [{:name "Santtu" :zipcode "00560" :city "Helsinki"}]
           actual (-> result-set (nest :address [:zipcode :city]))]
+      (is (= expected actual))))
+  (testing "nesting and renaming columns"
+    (let [expected [{:name "Santtu" :address {:zipcode "00560" :city "Helsinki"}}]
+          result-set [{:name "Santtu" :address_zipcode "00560" :address_city "Helsinki"}]
+          actual (-> result-set (nest :address {:address_zipcode :zipcode :address_city :city}))]
       (is (= expected actual)))))
 
 (deftest test-collect
